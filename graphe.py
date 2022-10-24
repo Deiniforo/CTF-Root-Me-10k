@@ -1,35 +1,43 @@
 import socket
 
 
-
+#The server sends messages like this:
 #___________________________________________________________________________________________________________#
 # Server: Hello there! I need some help for my homework, pleeeease.                                         #
-# [1/60] Here's my graph's adjacency list, can you tell me if I can reach node 7 from 19 please? (yes / no) #
-# Node 0 has a directed edge to : 1, 6                                                                      #
-# Node 1 has a directed edge to : 5, 16                                                                     #
-# Node 2 has a directed edge to : 14, 15, 17, 19                                                            #
-# Node 3 has a directed edge to : 13                                                                        #
-# Node 4 has no directed edge                                                                               #
+# [1/60] Here's my graph's adjacency list, can you tell me if I can reach node 3 from 7 please? (yes / no)  #
+# Node 0 has a directed edge to : 1                                                                         #
+# Node 1 has a directed edge to : 2, 3, 5                                                                   #
+# Node 2 has a directed edge to : 4                                                                         #
+# Node 3 has no directed edge                                                                               #
+# Node 4 has a directed edge to : 2, 6                                                                      #
 # Node 5 has no directed edge                                                                               #
-# Node 6 has a directed edge to : 13, 16, 17                                                                #
-# Node 7 has a directed edge to : 5, 19                                                                     #
-# Node 8 has a directed edge to : 3                                                                         #
-# Node 9 has a directed edge to : 6                                                                         #
-# Node 10 has no directed edge                                                                              #
-# Node 11 has a directed edge to : 3, 7, 17                                                                 #
-# Node 12 has a directed edge to : 8, 17, 20                                                                #
-# Node 13 has a directed edge to : 3, 7, 10, 17, 19, 20                                                     #
-# Node 14 has a directed edge to : 2, 6, 9, 13, 17, 19, 20                                                  #
-# Node 15 has no directed edge                                                                              #
-# Node 16 has a directed edge to : 0, 3                                                                     #
-# Node 17 has a directed edge to : 2, 4                                                                     #
-# Node 18 has a directed edge to : 11, 15, 19                                                               #
-# Node 19 has a directed edge to : 9, 20                                                                    #
-# Node 20 has a directed edge to : 4                                                                        #
+# Node 6 has no directed edge                                                                               #
+# Node 7 has a directed edge to : 0, 8                                                                      #
+# Node 8 has a directed edge to : 4, 7                                                                      #
 #___________________________________________________________________________________________________________#
 
 
 
+
+#___________________________________________________________________________________________________________#
+# In this case, the graph is like this :                                                                    #
+#                                                                                                           #
+#        3             6                                                                                    #
+#        ^             ^                                                                                    #
+#        |             |                                                                                    #
+# 5 <--- 1 ---> 2 <==> 4                                                                                    #
+#        ^             ^                                                                                    #
+#        |             |                                                                                    #
+#        0 <--- 7 <==> 8                                                                                    #
+#                                                                                                           #
+# We need to find out if there is a path between two points of this graph.                                  #
+# In the case of this example, a path does exist from 7 to 3. We can go for example through 7-> 0-> 1-> 3.  #
+# So the answer to send to the server is "yes".                                                             #
+#___________________________________________________________________________________________________________#
+
+# Here's how I solved this challenge:
+
+# I need a function that can tell me if a path exist or not:
 # This function takes as input two point indices and a dictionary representing the links of the graph.
 # It returns True if there is a path between the entry point and the exit point, False otherwise.
 def booleen(entry,exit,D):
@@ -47,10 +55,11 @@ def booleen(entry,exit,D):
                     bool=bool or booleen(o,exit,D)
             return(bool)
 
-# connexion
+
+# Now we just have to connect to the server, get the information and build the dictionary. Then send the answer.
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('ctf10k.root-me.org', 8001))
-
 while True:
     # We retrieve the message from the server.
     message_serveur=str(s.recv(2048).decode('utf-8'))
@@ -62,8 +71,6 @@ while True:
         message_beginning_index+=1
     message=message_serveur[:message_beginning_index]
     Liste=message_serveur[message_beginning_index+18:].split("\n")[1:-1]
-
-
 
     message_end_index=0
     while message[message_end_index:message_end_index+4]!="/60]":
